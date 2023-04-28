@@ -21,6 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _userController = TextEditingController();
   Uint8List? _image;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -37,6 +38,27 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() {
       _image = im;
     });
+  }
+
+  void signUpUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+    String res = await AuthMethods().signUpUser(
+      email: _emailController.text,
+      password: _passController.text,
+      username: _userController.text,
+      bio: _bioController.text,
+      file: _image!,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (res != 'sucess') {
+      showSnackBar(res, context);
+    } else {}
   }
 
   @override
@@ -159,28 +181,26 @@ class _SignupScreenState extends State<SignupScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    child: Text("Don't have an account"),
+                    child: Text("Already have an account"),
                     padding: EdgeInsets.symmetric(vertical: 8),
                   ),
                   InkWell(
-                    onTap: () async {
-                      String res = await AuthMethods().signUpUser(
-                        email: _emailController.text,
-                        password: _passController.text,
-                        username: _userController.text,
-                        bio: _bioController.text,
-                        file: _image!,
-                      );
-                    },
-                    child: Container(
-                      child: Text(
-                        " Sign Up.",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                    ),
+                    onTap: signUpUser,
+                    child: _isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: primaryColor,
+                            ),
+                          )
+                        : Container(
+                            child: Text(
+                              " Login Up.",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                          ),
                   ),
                 ],
               ),
