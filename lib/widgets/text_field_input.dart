@@ -20,7 +20,7 @@ class TextFieldInput extends StatelessWidget {
   Widget build(BuildContext context) {
     final inputBorder =
         OutlineInputBorder(borderSide: Divider.createBorderSide(context));
-    return TextField(
+    return TextFormField(
       controller: textEditingController,
       decoration: InputDecoration(
         hintText: hintText,

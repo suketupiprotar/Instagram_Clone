@@ -1,6 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:instagram_clone/resources/auth_methods.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/text_field_input.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -15,6 +20,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _userController = TextEditingController();
+  Uint8List? _image;
 
   @override
   void dispose() {
@@ -24,6 +30,13 @@ class _SignupScreenState extends State<SignupScreen> {
     _passController.dispose();
     _bioController.dispose();
     _userController.dispose();
+  }
+
+  void selectImage() async {
+    Uint8List im = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = im;
+    });
   }
 
   @override
@@ -54,18 +67,26 @@ class _SignupScreenState extends State<SignupScreen> {
               //circular widget to accept and show our selected file
               Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 64,
-                    backgroundImage: NetworkImage(
-                        'https://images.unsplash.com/photo-1682289571752-c14e69310e64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80,'),
-                  ),
+                  _image != null
+                      ? CircleAvatar(
+                          radius: 64,
+                          backgroundImage: MemoryImage(_image!),
+                        )
+                      : CircleAvatar(
+                          radius: 64,
+                          backgroundImage: NetworkImage(
+                              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuMT6kuEjCVGQmABoZtE-s1X_Eo5EcAH277BxLriNjnQ&s'),
+                        ),
                   Positioned(
-                    bottom: -10,
+                      bottom: -10,
                       left: 80,
                       child: IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add,color: Colors.blue,),
-                  ))
+                        onPressed: selectImage,
+                        icon: const Icon(
+                          Icons.add,
+                          color: Colors.blue,
+                        ),
+                      ))
                 ],
               ),
               const SizedBox(
@@ -142,7 +163,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     padding: EdgeInsets.symmetric(vertical: 8),
                   ),
                   InkWell(
-                    onTap: () {},
+                    onTap: () async {
+                      String res = await AuthMethods().signUpUser(
+                        email: _emailController.text,
+                        password: _passController.text,
+                        username: _userController.text,
+                        bio: _bioController.text,
+                        file: _image!,
+                      );
+                    },
                     child: Container(
                       child: Text(
                         " Sign Up.",
