@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/storage_method.dart';
+import 'package:instagram_clone/model/user.dart' as model;
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -29,16 +30,21 @@ class AuthMethods {
 
         String photoUrl = await StorageMethods()
             .uploadImageToStorage('profilePics', file, false);
+
         //add user to our database
-        await _firestore.collection('users').doc(cred.user!.uid).set({
-          'username': username,
-          'uid': cred.user!.uid,
-          'email': email,
-          'bio': bio,
-          'followers': [],
-          'following': [],
-          'photoUrl': photoUrl,
-        });
+        model.User user = model.User(
+          username: username,
+          uid: cred.user!.uid,
+          email: email,
+          bio: bio,
+          photoUrl: photoUrl,
+          followers: [],
+          following: [],
+        );
+
+        await _firestore.collection('users').doc(cred.user!.uid).set(
+              user.toJson(),
+            );
         res = 'Success';
       }
     } on FirebaseAuthException catch (err) {
@@ -54,26 +60,24 @@ class AuthMethods {
   }
 
   //login in user
-  Future<String> loginUser({required String email, required String password})async {
+  Future<String> loginUser(
+      {required String email, required String password}) async {
     String res = 'Some error occured';
     try {
-      if(email.isNotEmpty || password.isNotEmpty){
-        await _auth.signInWithEmailAndPassword(email: email, password: password);  
+      if (email.isNotEmpty || password.isNotEmpty) {
+        await _auth.signInWithEmailAndPassword(
+            email: email, password: password);
         res = 'success';
-      }
-      else{
+      } else {
         res = 'Please Enter All the fields';
       }
-     } on FirebaseAuthException catch(e){
-      if(e.code == 'user-not-found'){
-          res = 'User not found';
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        res = 'User not found';
+      } else if (e.code == 'wrong-password') {
+        res = 'Password Not Found';
       }
-      else if(e.code == 'wrong-password')
-      {
-          res = 'Password Not Found';
-      }
-     } 
-    catch (err) {
+    } catch (err) {
       res = err.toString();
     }
     return res;
