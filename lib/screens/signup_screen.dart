@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/resources/auth_methods.dart';
+import 'package:instagram_clone/responsive/mobile_screen_layout.dart';
+import 'package:instagram_clone/responsive/responsive_layout_screen.dart';
+import 'package:instagram_clone/responsive/web_screen_layout.dart';
+import 'package:instagram_clone/screens/login_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/text_field_input.dart';
@@ -56,9 +60,27 @@ class _SignupScreenState extends State<SignupScreen> {
       _isLoading = false;
     });
 
-    if (res != 'sucess') {
+    if (res != 'Success') {
       showSnackBar(res, context);
-    } else {}
+    } else {
+      showSnackBar(res, context);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const ResponsiveLayout(
+            webScreenLayout: WebScreenLayout(),
+            mobileScreenLayout: MobileScreenLayout(),
+          ),
+        ),
+      );
+    }
+  }
+
+  void navigateToLogin() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -154,9 +176,15 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               //button login
               InkWell(
-                onTap: () {},
+                onTap: signUpUser,
                 child: Container(
-                  child: const Text('Login'),
+                  child: _isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                          ),
+                        )
+                      : const Text('Sign UP'),
                   width: double.infinity,
                   alignment: Alignment.center,
                   padding: EdgeInsets.symmetric(vertical: 12),
@@ -181,26 +209,20 @@ class _SignupScreenState extends State<SignupScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    child: Text("Already have an account"),
+                    child: Text("Already have an account?"),
                     padding: EdgeInsets.symmetric(vertical: 8),
                   ),
                   InkWell(
-                    onTap: signUpUser,
-                    child: _isLoading
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              color: primaryColor,
-                            ),
-                          )
-                        : Container(
-                            child: Text(
-                              " Login Up.",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                          ),
+                    onTap: navigateToLogin,
+                    child: Container(
+                      child: Text(
+                        " Login ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                    ),
                   ),
                 ],
               ),

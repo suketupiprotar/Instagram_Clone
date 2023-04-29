@@ -39,7 +39,7 @@ class AuthMethods {
           'following': [],
           'photoUrl': photoUrl,
         });
-        res = 'Sucess';
+        res = 'Success';
       }
     } on FirebaseAuthException catch (err) {
       if (err.code == 'invalid-email') {
@@ -48,6 +48,32 @@ class AuthMethods {
         res = 'password should be at least 6 characters';
       }
     } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  //login in user
+  Future<String> loginUser({required String email, required String password})async {
+    String res = 'Some error occured';
+    try {
+      if(email.isNotEmpty || password.isNotEmpty){
+        await _auth.signInWithEmailAndPassword(email: email, password: password);  
+        res = 'success';
+      }
+      else{
+        res = 'Please Enter All the fields';
+      }
+     } on FirebaseAuthException catch(e){
+      if(e.code == 'user-not-found'){
+          res = 'User not found';
+      }
+      else if(e.code == 'wrong-password')
+      {
+          res = 'Password Not Found';
+      }
+     } 
+    catch (err) {
       res = err.toString();
     }
     return res;
