@@ -28,15 +28,16 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
     pageController.dispose();
   }
 
-  void navigationTapped(int page) {
-    pageController.jumpTo(page.toDouble());
-  }
-
-  void onPageChanged(int page) {
+void onPageChanged(int page) {
     setState(() {
       _page = page;
     });
   }
+  void navigationTapped(int page) {
+    pageController.jumpToPage(page);
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
       ),
       bottomNavigationBar: CupertinoTabBar(
         backgroundColor: mobileBackgroundColor,
-        items: [
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(
               Icons.home,
@@ -61,7 +62,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           BottomNavigationBarItem(
             icon: Icon(
               Icons.search,
-              color: _page == 1 ? primaryColor : secondaryColor,
+              color: (_page == 1) ? primaryColor : secondaryColor,
             ),
             label: '',
             backgroundColor: primaryColor,
@@ -69,7 +70,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           BottomNavigationBarItem(
             icon: Icon(
               Icons.add_circle,
-              color: _page == 2 ? primaryColor : secondaryColor,
+              color: (_page == 2) ? primaryColor : secondaryColor,
             ),
             label: '',
             backgroundColor: primaryColor,
@@ -77,7 +78,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           BottomNavigationBarItem(
             icon: Icon(
               Icons.favorite,
-              color: _page == 3 ? primaryColor : secondaryColor,
+              color: (_page == 3) ? primaryColor : secondaryColor,
             ),
             label: '',
             backgroundColor: primaryColor,
@@ -85,13 +86,14 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           BottomNavigationBarItem(
             icon: Icon(
               Icons.person,
-              color: _page == 4 ? primaryColor : secondaryColor,
+              color: (_page == 4) ? primaryColor : secondaryColor,
             ),
             label: '',
             backgroundColor: primaryColor,
           ),
         ],
         onTap: navigationTapped,
+        currentIndex: _page,
       ),
     );
   }
