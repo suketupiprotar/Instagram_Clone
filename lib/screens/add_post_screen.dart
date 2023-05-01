@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/providers/user_provider.dart';
+import 'package:instagram_clone/resources/firestore_methods.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
@@ -19,15 +20,38 @@ class AddPostScreen extends StatefulWidget {
 class _AddPostScreenState extends State<AddPostScreen> {
   Uint8List? _file;
   final TextEditingController _descriptionController = TextEditingController();
+  bool _isLoading = false;
 
-
-  void postImage(String uid,String username,String profImage,) async{
-    try{
-
-    }
-    catch(e)
-    {
-
+  void postImage(
+    String uid,
+    String username,
+    String profImage,
+  ) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      String res = await FirestoreMethods().uploadPost(
+        _descriptionController.text,
+        _file!,
+        uid,
+        username,
+        profImage,
+      );
+      if (res == 'success') {
+        setState(() {
+          _isLoading = false;
+        });
+        showSnackBar("Posted", context);
+        clearImage();
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        showSnackBar(res, context);
+      }
+    } catch (e) {
+      showSnackBar(e.toString(), context);
     }
   }
 
@@ -83,6 +107,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
     );
   }
 
+  void clearImage(){
+    setState(() {
+      _file = null;
+    });
+  }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -107,13 +137,17 @@ class _AddPostScreenState extends State<AddPostScreen> {
               backgroundColor: mobileBackgroundColor,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
-                onPressed: postImage,
+                onPressed: clearImage,
               ),
               title: const Text('Post to'),
               centerTitle: false,
               actions: [
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => postImage(
+                    userProvider.getUser.uid,
+                    userProvider.getUser.username,
+                    userProvider.getUser.photoUrl,
+                  ),
                   child: const Text(
                     'Post',
                     style: TextStyle(
@@ -126,14 +160,26 @@ class _AddPostScreenState extends State<AddPostScreen> {
               ],
             ),
             body: Column(children: [
+              _isLoading
+                  ? const Center(
+                      child: LinearProgressIndicator(),
+                    )
+                  : Padding(
+                      padding: EdgeInsets.only(
+                        top: 0,
+                      ),
+                    ),
+                    const Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
-                    backgroundImage:  NetworkImage(
-                      userProvider.getUser.photoUrl == null ? 'https://images.unsplash.com/photo-1682752013493-44c33ab9f856?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=872&q=80' : userProvider.getUser.photoUrl
-                    ),
+                    backgroundImage: NetworkImage(userProvider
+                                .getUser.photoUrl ==
+                            null
+                        ? 'https://images.unsplash.com/photo-1682752013493-44c33ab9f856?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=872&q=80'
+                        : userProvider.getUser.photoUrl),
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.45,
