@@ -6,6 +6,7 @@ import 'package:instagram_clone/responsive/responsive_layout_screen.dart';
 import 'package:instagram_clone/responsive/web_screen_layout.dart';
 import 'package:instagram_clone/screens/signup_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/global_variables.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/text_field_input.dart';
 
@@ -13,20 +14,19 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _emailController.dispose();
-    _passController.dispose();
+    _passwordController.dispose();
   }
 
   void loginUser() async {
@@ -34,21 +34,20 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
     String res = await AuthMethods().loginUser(
-        email: _emailController.text, password: _passController.text);
-
+        email: _emailController.text, password: _passwordController.text);
     if (res == 'success') {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const ResponsiveLayout(
+              mobileScreenLayout: MobileScreenLayout(),
+              webScreenLayout: WebScreenLayout(),
+            ),
+          ),
+          (route) => false);
+
       setState(() {
         _isLoading = false;
       });
-      showSnackBar(res, context);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const ResponsiveLayout(
-            webScreenLayout: WebScreenLayout(),
-            mobileScreenLayout: MobileScreenLayout(),
-          ),
-        ),
-      );
     } else {
       setState(() {
         _isLoading = false;
@@ -57,22 +56,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void navigateToSignUp() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SignupScreen(),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: 32,
-          ),
+          padding: MediaQuery.of(context).size.width > webScreenSize
+              ? EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width / 3)
+              : const EdgeInsets.symmetric(horizontal: 32),
           width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -81,7 +74,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Container(),
                 flex: 2,
               ),
-              //svg image(logo)
               SvgPicture.asset(
                 'assets/ic_instagram.svg',
                 color: primaryColor,
@@ -90,73 +82,74 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 64,
               ),
-              //text field input for email
               TextFieldInput(
-                textEditingController: _emailController,
-                hintText: 'Enter Your Email',
+                hintText: 'Enter your email',
                 textInputType: TextInputType.emailAddress,
+                textEditingController: _emailController,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 24,
               ),
-              //text field input for password
               TextFieldInput(
-                textEditingController: _passController,
-                hintText: 'Enter Your Password',
+                hintText: 'Enter your password',
                 textInputType: TextInputType.text,
+                textEditingController: _passwordController,
                 isPass: true,
               ),
               const SizedBox(
                 height: 24,
               ),
-              //button login
               InkWell(
-                onTap: loginUser,
-                child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
+                child: Container(
+                  child: !_isLoading
+                      ? const Text(
+                          'Log in',
+                        )
+                      : const CircularProgressIndicator(
                           color: primaryColor,
                         ),
-                      )
-                    : Container(
-                        child: const Text('Login'),
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        decoration: ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(4),
-                              ),
-                            ),
-                            color: blueColor),
-                      ),
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: const ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(4)),
+                    ),
+                    color: blueColor,
+                  ),
+                ),
+                onTap: loginUser,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
               Flexible(
                 child: Container(),
                 flex: 2,
               ),
-              //Transitioning to signing up
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    child: Text("Don't have an account?"),
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: const Text(
+                      'Dont have an account?',
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
-                  InkWell(
-                    onTap: navigateToSignUp,
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SignupScreen(),
+                      ),
+                    ),
                     child: Container(
-                      child: Text(
-                        " Sign Up.",
+                      child: const Text(
+                        ' Signup.',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
                 ],
